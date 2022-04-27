@@ -1,5 +1,5 @@
-#include "parser.h"
 #include "memory"
+#include "include/parser.h"
 
 char parser::fix_punc(string& str, std::vector<char> lookup) {
 	for (auto& x : lookup) {
