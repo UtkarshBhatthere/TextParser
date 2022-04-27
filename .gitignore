@@ -1,3 +1,9 @@
 // Executables generated through Toolchain
 *.out
 *.exe
+
+// Cmake build system files
+build
+
+// vscode files
+.vscode
