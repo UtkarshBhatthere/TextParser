@@ -1,14 +1,15 @@
 #include "memory"
 #include "include/parser.h"
 
-char parser::fix_punc(string& str, std::vector<char> lookup) {
+void parser::fix_punc(string& str, std::vector<char> lookup) {
 	for (auto& x : lookup) {
 		if (str.back() == x) {
 			str.erase(str.end() - 1);
-			return x;
+			return;
 		}
 	}
-	return false;
+
+	return;
 }
 
 
@@ -30,20 +31,30 @@ unsigned long parser::fill_map(strstream &stream)
 	iter begin = iter(stream);
 	iter end = iter();
 
-	int curr_count = unique_word_count;
+	uint64_t prev_unique_count = this->unique_word_count;
+	uint64_t batch_word_count = 0;
 
+	// Parse incoming stream.
 	while (begin != end) {
 		string word(*begin);
-		char punc_symbol = fix_punc(word, punc_lookup);
-		deduplicated_index.insert(std::pair<string, string>(word, word));
-		word_count++;
+		uint64_t curr_word_count = 0;
+
+		fix_punc(word, punc_lookup);						// Remove trailing punctutaions.
+		curr_word_count = deduplicated_index.count(word);	// 0 if not present, curr count if present.
+
+		deduplicated_index.insert(std::pair<string, uint64_t>(word, ++curr_word_count));
+		batch_word_count++;		// +1 words parsed in this batch.
+
 		begin++;
 	}
-	unique_word_count = deduplicated_index.size();
-	return unique_word_count - curr_count;
+
+	// Update Class level data.
+	this->word_count += batch_word_count;
+	this->unique_word_count = deduplicated_index.size();	// Total Unique keys in Map
+	return unique_word_count - prev_unique_count;
 }
 
-std::map<std::string, std::string>& parser::export_index(void)
+std::map<std::string, uint64_t>& parser::export_index(void)
 {
 	return deduplicated_index;
 }

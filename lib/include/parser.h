@@ -6,6 +6,8 @@
 #include <map>
 #include <iterator>
 
+#include "common.h"
+
 class parser
 {
 private:
@@ -19,18 +21,18 @@ private:
 	// For overall figures.
 	unsigned long word_count = 0;
 	unsigned long unique_word_count = 0;
-	// Lexical Word Pool.
-	std::map<string, string> deduplicated_index;
+	// Lexical Word Pool: word is key and count is value.
+	std::map<string, uint64_t> deduplicated_index;
 	// Punctuation symbols.
 	std::vector<char> punc_lookup;
 
 	// -> Member Functions <- //
-	char fix_punc(string& str, std::vector<char> lookup);
+	void fix_punc(string& str, std::vector<char> lookup);
 
 public:
 	parser(strstream &stream);
 	unsigned long fill_map(strstream &stream);
-	std::map<string, string>& export_index(void);
+	std::map<string, uint64_t>& export_index(void);
 	string word_stat(void);
 };
 
