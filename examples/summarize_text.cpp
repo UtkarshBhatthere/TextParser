@@ -2,7 +2,7 @@
 #include <fstream>
 #include "parser.h"
 
-std::string assetPath = "./assets";
+std::string assetPath = "../assets";
 
 
 int main() {
