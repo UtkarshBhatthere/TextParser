@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+#include "common.h"
+
 namespace wordmap {
 
     uint64_t addToMap(std::map<std::string, uint64_t> &base_map, std::string word)
@@ -42,6 +44,39 @@ namespace sorted_vec {
         std::move(final_vec.begin(), final_vec.end(), std::back_inserter(temp_vec));
         final_vec.reserve(temp_vec.size() + to_merge_vec.size());
         std::set_union(temp_vec.begin(), temp_vec.end(), to_merge_vec.begin(), to_merge_vec.end(), std::back_inserter(final_vec));
+        return;
+    }
+};
+
+namespace stat_stream {
+
+    void fillStatFromSortedVector(std::stringstream &stream, std::vector<std::pair<std::string, uint64_t>> &sorted_vec)
+    {
+        if (sorted_vec.empty()) {
+            return;
+        }
+
+        if (sorted_vec.size() <= CONST_TEN) {
+            std::for_each(sorted_vec.begin(), sorted_vec.end(), [&stream](auto &pair)
+                {
+                    stream << "Word: " << pair.first << ", Count: " << pair.second << std::endl; 
+                });
+            return;
+        }
+
+        stream << "\nMost Frequent Words\n===================\n";
+        std::for_each(sorted_vec.begin(), sorted_vec.begin()+CONST_FIVE, [&stream](auto &pair)
+                {
+                    stream << "Word: \"" << pair.first << "\", Count: " << pair.second << std::endl; 
+                });
+        
+        stream << "\nLeast Frequent Words\n====================\n";
+        std::for_each(sorted_vec.end()-CONST_FIVE, sorted_vec.end(), [&stream](auto &pair)
+                {
+                    stream << "Word: \"" << pair.first << "\", Count: " << pair.second << std::endl; 
+                });
+
+        stream << "\nNote: The Word is lexically sorted so words not listed here may have same frequency.\n";
         return;
     }
 };

@@ -1,5 +1,9 @@
 #include "memory"
+#include "sstream"
+#include "algorithm"
+
 #include "include/parser.h"
+#include "containerHelper.hpp"
 
 void parser::fix_punc(string& str, std::vector<char> lookup) {
 	for (auto& x : lookup) {
@@ -30,25 +34,36 @@ unsigned long parser::fill_map(strstream &stream)
 	// used in word by word parsing.
 	iter begin = iter(stream);
 	iter end = iter();
-
 	uint64_t prev_unique_count = this->unique_word_count;
 	uint64_t batch_word_count = 0;
+	
+	// Batch wise parsing of strstream.
+	std::map<string, uint64_t> batch_map;
+	std::vector<std::pair<string, uint64_t>> curr_vec((this->deduplicated_index.size()));
+	std::vector<std::pair<string, uint64_t>> batch_vec;
 
 	// Parse incoming stream.
 	while (begin != end) {
 		string word(*begin);
-		uint64_t curr_word_count = 0;
+		uint64_t word_freq = 0;
+		uint64_t batch_word_freq = 0;
 
 		fix_punc(word, punc_lookup);						// Remove trailing punctutaions.
-		curr_word_count = deduplicated_index.count(word);	// 0 if not present, curr count if present.
 
-		deduplicated_index.insert(std::pair<string, uint64_t>(word, ++curr_word_count));
+		wordmap::addToMap(this->deduplicated_index, word);
+		wordmap::addToMap(batch_map, word);
+
 		batch_word_count++;		// +1 words parsed in this batch.
-
 		begin++;
 	}
 
-	// Update Class level data.
+	// Generate a sorted vector from word_map
+	wordmap::mapToSortedArray(batch_map, batch_vec);
+
+	// Merge sorted batch vector to main sorted vector.
+	sorted_vec::mergeInVector(this->sorted_vec, batch_vec);
+
+	// Update Class level data
 	this->word_count += batch_word_count;
 	this->unique_word_count = deduplicated_index.size();	// Total Unique keys in Map
 	return unique_word_count - prev_unique_count;
@@ -61,8 +76,10 @@ std::map<std::string, uint64_t>& parser::export_index(void)
 
 std::string parser::word_stat(void)
 {
-	std::unique_ptr<char[]> buffer(new char[100]);
-	const char* format = "Total words: %d, Unique words: %d\n";
-	int size = snprintf(buffer.get(), 100, format, word_count, unique_word_count);
-	return std::string(buffer.get(), buffer.get() + size - 1);
+	std::stringstream stream;
+
+	stream << "Word Map Summary\n================\n";
+	stream << "Total Words: " << this->word_count << ", Unique Words: " << this->unique_word_count << " \n";
+	stat_stream::fillStatFromSortedVector(stream, this->sorted_vec);
+	return stream.str();
 }
