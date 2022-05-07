@@ -1,9 +1,10 @@
 #pragma once
 
+#include <map>
+#include <list>
+#include <vector>
 #include <string>
 #include <fstream>
-#include <vector>
-#include <map>
 #include <iterator>
 
 #include "common.h"
@@ -21,10 +22,16 @@ private:
 	// For overall figures.
 	unsigned long word_count = 0;
 	unsigned long unique_word_count = 0;
+
+	// Punctuation symbols for word sanitisation.
+	std::vector<char> punc_lookup;
+	
 	// Lexical Word Pool: word is key and count is value.
 	std::map<string, uint64_t> deduplicated_index;
-	// Punctuation symbols.
-	std::vector<char> punc_lookup;
+
+	// Countwise Descending Sorted word pairs.
+	std::vector<std::pair<string, uint64_t>> sorted_vec;
+	
 
 	// -> Member Functions <- //
 	void fix_punc(string& str, std::vector<char> lookup);
